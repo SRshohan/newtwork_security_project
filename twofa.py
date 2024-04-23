@@ -18,8 +18,10 @@ def verification(key):
 
 
 key = "GrasoAndFlacoApp"
-print(otpGoogleAuthenticator(key))
-verification(key)
+# print(otpGoogleAuthenticator(key))
+# verification(key)
+
+st.image('totp.png', caption="Scan the QR code to setup Google authentication: ")
 
 
 
