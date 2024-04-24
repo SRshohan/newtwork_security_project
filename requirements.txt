@@ -1,0 +1,7 @@
+opanai
+streamlit
+pyotp
+sendgrid
+qrcode
+watchdog
+bycrypt 
