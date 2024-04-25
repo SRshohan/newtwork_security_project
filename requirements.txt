@@ -3,9 +3,6 @@ streamlit
 pyotp
 sendgrid
 qrcode
-<<<<<<< HEAD
 watchdog
 bycrypt 
-=======
-watchdog
->>>>>>> main
+
