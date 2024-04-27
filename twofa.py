@@ -1,34 +1,26 @@
 import streamlit as st
 import pyotp
-import sendgrid
-from time import sleep
 import qrcode
 
-def otpGoogleAuthenticator(key):
-    otp = pyotp.totp.TOTP(key).provisioning_uri(name="username", issuer_name="Authenticator App")
-    qrc = qrcode.make(otp).save("totp.png")
 
-    return otp
-
-def verification(key):
-    # res = []
+key = pyotp.random_base32()  # Generate a random TOTP key
+def generate_totp_qr(username):
+    """Generates and saves a QR code for TOTP authentication."""
+    # key = pyotp.random_base32()  # Generate a random TOTP key
     totp = pyotp.TOTP(key)
-    while True:
-        print(totp.verify(input("Enter OTP: ")))
+    uri = totp.provisioning_uri(name=username, issuer_name="Authenticator App")
+    qr = qrcode.make(uri)
+    qr.save(f"{username}.png")
 
-
-key = "GrasoAndFlacoApp"
-# print(otpGoogleAuthenticator(key))
-# verification(key)
-
-# st.image('totp.png', caption="Scan the QR code to setup Google authentication: ")
-
+def verify_totp(key, otp_code):
+    """Verifies the OTP code entered by the user."""
+    totp = pyotp.TOTP(key)
+    return totp.verify(otp_code)
 
 def sign_up():
+    """User sign-up process."""
     with st.form("signup_form"):
-        st.write("### Sign Up")
-        st.write("Please enter your details below to create an account.")
-        
+        st.markdown("### Sign Up\nPlease enter your details below to create an account.")
         # Adding a colorful background to the title using Streamlit's columns
         col1, col2, col3 = st.columns([1, 6, 1])
         with col2:
@@ -46,49 +38,56 @@ def sign_up():
                 </style>
                 <p class="big-font">Create Your Account</p>
                 """, unsafe_allow_html=True)
-
-        # Input fields
-        username = st.text_input("Username", placeholder="Your username")
-        email = st.text_input("Email", placeholder="Your email address")
-        password = st.text_input("Password", type="password", placeholder="Create a password")
-        password_confirm = st.text_input("Confirm Password", type="password", placeholder="Confirm your password")
-        
-        # Submit button
+        username = st.text_input("Username")
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        password_confirm = st.text_input("Confirm Password", type="password")
         submitted = st.form_submit_button("Sign Up")
+        
         if submitted:
             if not username or not email or not password or not password_confirm:
                 st.error("Please fill in all fields.")
             elif password != password_confirm:
-                st.error("Passwords do not match. Please try again.")
+                st.error("Passwords do not match.")
             else:
-                st.success("Sign Up Successful!")
-                st.session_state['is_signed_up'] = True
-
-def setup_totp():
-    if 'is_signed_up' in st.session_state and st.session_state['is_signed_up']:
-        st.image('totp.png', caption="Scan the QR code to setup Google authentication.")
-        if st.button("I have set up my TOTP"):
-            st.session_state['totp_set'] = True
+                totp_key = generate_totp_qr(username)
+                st.session_state['totp_key'] = totp_key  # Store key in session for use in login
+                st.image("totp.png", caption="Scan the QR code with your TOTP app to finish setup.")
+                st.success("Sign Up Successful! Please save your TOTP key securely.")
+        generate_totp_qr(username)
 
 def login_page():
-    if 'totp_set' in st.session_state and st.session_state['totp_set']:
-        with st.form("login_form"):
-            st.write("### Log In")
-            username = st.text_input("Username", placeholder="Enter your username")
-            password = st.text_input("Password", type="password", placeholder="Enter your password")
-            otp_code = st.text_input("OTP Code", placeholder="Enter your OTP code")
-            submitted = st.form_submit_button("Log In")
-            if submitted:
-                # Place authentication logic here
-                st.success("Logged in successfully!")  # Update with actual validation logic
+    """User login process."""
+    with st.form("login_form"):
+        st.markdown("### Log In")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        otp_code = st.text_input("OTP Code")
+        submitted = st.form_submit_button("Log In")
+        
+        if submitted:
+            # Here you'd use the actual key associated with the username
+            if 'totp_key' in st.session_state and verify_totp(st.session_state['totp_key'], otp_code):
+                st.success("Logged in successfully!")
+            else:
+                st.error("Invalid login or OTP. Please try again.")
+    if verify_totp(key, otp_code) == True:
+        st.write("Login Successful")
+    else:
+        st.write("Not Correct!")
+
+def main():
+    """Main function to select the user action: Sign Up or Log In."""
+    st.title("Welcome! Select Your Option")
+    choice = st.radio("What would you like to do?", ['Create an Account', 'Login'])
+    
+    if choice == 'Create an Account':
+        sign_up()
+    elif choice == 'Login':
+        login_page()
+
+
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="Sign Up", page_icon=":pencil:")
-    if 'is_signed_up' not in st.session_state:
-        st.session_state['is_signed_up'] = False
-    if 'totp_set' not in st.session_state:
-        st.session_state['totp_set'] = False
-
-    sign_up()
-    setup_totp()
-    login_page()
+    st.set_page_config(page_title="Welcome", page_icon=":key:")
+    main()
