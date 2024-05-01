@@ -1,8 +1,9 @@
 import streamlit as st
+import pyotp
 from twofa import generate_totp_qr, verify_totp
 
 
-
+key = pyotp.random_base32()
 def sign_up():
     """User sign-up process."""
     with st.form("signup_form"):
@@ -35,11 +36,20 @@ def sign_up():
             elif password != password_confirm:
                 st.error("Passwords do not match.")
             else:
-                totp_key = generate_totp_qr(email)
-                st.session_state['totp_key'] = totp_key  # Store key in session for use in login
-                st.image(f"{email}.png", caption="Scan the QR code with your TOTP app to finish setup.")
-                st.success("Sign Up Successful! Please save your TOTP key securely.")
-        generate_totp_qr(email)
+                otp = pyotp.random_base32()
+                sendEmail(email, otp)
+                user_otp = st.text_input("Enter the OTP sent to your email", key="otp_verification")
+                verify_button = st.button("Verify OTP")
+                if verify_button:
+                    st.session_state['Verified'] = True
+                    st.success("Email successfully verified!!! Please proced to 2FA verification.")
+                else:
+                    st.error("Invalid OTP. Please try again.")
+                    
+                # totp_key = generate_totp_qr(email)
+                # st.session_state['totp_key'] = totp_key  # Store key in session for use in login
+                # st.image(f"{email}.png", caption="Scan the QR code with your TOTP app to finish setup.")
+                # st.success("Sign Up Successful! Please save your TOTP key securely.")
 
 def login_page():
     """User login process."""
@@ -56,13 +66,10 @@ def login_page():
                 st.success("Logged in successfully!")
             else:
                 st.error("Invalid login or OTP. Please try again.")
-    if verify_totp(key, otp_code) == True:
-        st.write("Login Successful")
-    else:
-        st.write("Not Correct!")
 
 def main():
     """Main function to select the user action: Sign Up or Log In."""
+    st.set_page_config(page_title="Welcome", page_icon=":key:")
     st.title("Welcome! Select Your Option")
     choice = st.radio("What would you like to do?", ['Create an Account', 'Login'])
     
@@ -70,3 +77,4 @@ def main():
         sign_up()
     elif choice == 'Login':
         login_page()
+main()
