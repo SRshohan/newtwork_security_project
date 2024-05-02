@@ -3,11 +3,16 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
+import string
+import random
 
 
-load_dotenv()
-# Define email sender and receiver
-password = os.getenv('EMAIL_PASSWORD')
+
+
+# password = os.getenv('ENV', 'local')
+# dotenv = f'.env.{password}'
+# # Define email sender and receiver
+# load_dotenv(dotenv_path=dotenv)
 # receiver = 'sohanrahman182@gmail.com'
 
 # # Set the subject and body of the email
@@ -18,6 +23,9 @@ password = os.getenv('EMAIL_PASSWORD')
 # server.sendmail(email_sender, email_receiver, "Checking")  
 # server.quit()
 
+def randomDigit():
+    res = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    return str(res)
 
 
 def send_emails(receiver, otp):
@@ -27,8 +35,7 @@ def send_emails(receiver, otp):
     message['To'] = receiver
     message['Subject'] = 'Automated Email - DO NOT REPLY'
 
-    email_password = os.getenv('EMAIL_PASSWORD')  # Email 16 digit password from the .env
-    subject = "Automated Email - DO NOT REPLY"
+    password = os.getenv('EMAIL_PASSWORD_DEBUG')  # Email 16 digit password from the .env
     body = f"Your OTP is: {otp}"
 
     message.attach(MIMEText(body, 'plain'))
@@ -41,9 +48,8 @@ def send_emails(receiver, otp):
         text = message.as_string()
         server.sendmail(sender, receiver, text)
         server.quit()
-        print("Email sent successfully!")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        return e
 
 
 
