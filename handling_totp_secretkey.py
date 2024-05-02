@@ -8,6 +8,8 @@ from base64 import urlsafe_b64encode, urlsafe_b64decode
 
 def generate_and_endcrypt_secret_key(userpassword):
     """ Generating a secret key for OTP use"""
+    if isinstance(userpassword, str):
+        userpassword = userpassword.encode()
     secret_key = pyotp.random_base32()
     salt = os.urandom(16) # Generate a secure from the OS library which is randomly generated
     iv = os.urandom(16)
@@ -20,8 +22,6 @@ def generate_and_endcrypt_secret_key(userpassword):
     """
     kdf = Scrypt(salt, length=32, n=2**14, r=8, p=1, backend=default_backend())
     key = kdf.derive(userpassword)
-    if userpassword:
-        userpassword = userpassword.encode()
     """ Encrypt the secret key """
     """
     1. Initialize an AES cipher in CFB(Cipher FeedBack) mode with an 8-bit shift size, then turns a block cipher to stream cipher by modes.CFB8(os.urandom(16)

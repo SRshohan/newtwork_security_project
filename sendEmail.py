@@ -9,10 +9,10 @@ import random
 
 
 
-password = os.getenv('ENV', 'local')
-dotenv = f'.env.{password}'
-# Define email sender and receiver
-load_dotenv(dotenv_path=dotenv)
+# password = os.getenv('ENV', 'local')
+# dotenv = f'.env.{password}'
+# # Define email sender and receiver
+# load_dotenv(dotenv_path=dotenv)
 # receiver = 'sohanrahman182@gmail.com'
 
 # # Set the subject and body of the email
@@ -48,9 +48,8 @@ def send_emails(receiver, otp):
         text = message.as_string()
         server.sendmail(sender, receiver, text)
         server.quit()
-        print("Email sent successfully!")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        return e
 
 
 

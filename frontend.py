@@ -1,10 +1,11 @@
 import streamlit as st
 import pyotp
 from twofa import generate_totp_qr, verify_totp
+import sendEmail
 
 
 
-def sign_up():
+def sign_up(otp_code):
     """User sign-up process."""
     with st.form("signup_form"):
         st.markdown("### Sign Up\nPlease enter your details below to create an account.")
@@ -36,8 +37,8 @@ def sign_up():
             elif password != password_confirm:
                 st.error("Passwords do not match.")
             else:
-                otp = pyotp.random_base32()
-                sendEmail(email, otp)
+                # otp = pyotp.random_base32()
+                sendEmail.send_emails(email, otp_code)
                 user_otp = st.text_input("Enter the OTP sent to your email", key="otp_verification")
                 verify_button = st.button("Verify OTP")
                 if verify_button:
@@ -45,7 +46,7 @@ def sign_up():
                     st.success("Email successfully verified!!! Please proced to 2FA verification.")
                 else:
                     st.error("Invalid OTP. Please try again.")
-                    
+                   
                 # totp_key = generate_totp_qr(email)
                 # st.session_state['totp_key'] = totp_key  # Store key in session for use in login
                 # st.image(f"{email}.png", caption="Scan the QR code with your TOTP app to finish setup.")

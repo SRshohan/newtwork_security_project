@@ -16,6 +16,11 @@ def verify_totp(key, otp_code):
     """Verifies the OTP code entered by the user."""
     totp = pyotp.TOTP(key)
     return totp.verify(otp_code)
+    #     status = "Logged in successfully!"
+    #     return status
+    # else:
+    #     status = " Try agin "
+    #     return status
 
 
 
