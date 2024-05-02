@@ -7,14 +7,12 @@ import json
 def createTable():
     conn = sqlite3.connect("Verification.db")
     cur = conn.cursor()
-
     cur.execute('''CREATE TABLE IF NOT EXISTS User_Info(
         Email TEXT NOT NULL,
         Password TEXT NOT NULL,
         Combined_data TEXT NOT NULL,
         PRIMARY KEY (Email),
         CONSTRAINT unique_val UNIQUE (Email))''')  
-    return cur
     
 def dropTables():
     conn = sqlite3.connect("Verification.db")
@@ -22,22 +20,22 @@ def dropTables():
     cur.execute("DROP TABLE IF EXISTS User_Info")
 
 def createAccount(email_input, userpassword, encrypted_data):
+    conn = sqlite3.connect("Verification.db")
+    cur = conn.cursor()
+    createTable()
     json_data = json.dumps({
         'encrypted':encrypted_data[0],
         'iv': encrypted_data[1],
         'salt': encrypted_data[2],
         'secret_key': encrypted_data[3]
     })
-
-    table = createTable()
     # email_input = validEmail()
     # password_input = validPassword()
     bytes = userpassword.encode('utf-8')
     salt = bcrypt.gensalt()
     encoded_password = bcrypt.hashpw(bytes, salt) #add the thing from sql lab
-    table.execute('''INSERT INTO User_Info (Email, Password, Combined_data) VALUES (?, ?, ?)''',
-                (email_input, encoded_password, json_data))
-    table.commit() 
+    cur.execute('''INSERT INTO User_Info (Email, Password, Combined_data) VALUES (?, ?, ?)''', (email_input, encoded_password, json_data, ))
+    cur.commit() 
 
 
 # def validEmail():
@@ -82,7 +80,6 @@ def checkAccount(email, password):
         else:
             return False
     else:
-        status = "Email not Found"
         return False
     
 def retieval_data(email):
@@ -121,4 +118,4 @@ def adminInfo():
 
 
 if __name__ == '__main__':
-    dropTables()
+    None

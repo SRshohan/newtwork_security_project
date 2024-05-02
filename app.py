@@ -1,9 +1,9 @@
 import backend
 import handling_totp_secretkey
 from twofa import verify_totp, generate_totp_qr
-import pyotp
 import sendEmail
 import streamlit as st
+from streamlit import error
 from dotenv import load_dotenv
 import os
 import re
@@ -74,22 +74,27 @@ def main():
                         st.error("Password is common. Try again...")
     #             print("Password is common. Try again...")
                     else:
-                        sendEmail.send_emails(email, sendEmail.randomDigit())
+                        randomdgt = sendEmail.randomDigit()
+                        sendEmail.send_emails(email, randomdgt)
+                        st.session_state['randomdgt'] = randomdgt 
                         user_otp = st.text_input("Enter the OTP sent to your email", key="otp_verification")
-                        verify_button = st.form_submit_button("Verify OTP")
+                        verify_button = st.button("Verify OTP")
+                        print('test')
                         if verify_button:
-                            st.session_state['Verified'] = True
-                            st.success("Email successfully verified!!! Please proced to 2FA verification.")
-                            generratingQR = generate_totp_qr(email, secretkey)
-                            st.session_state['generatingQR'] = generratingQR
-                            st.image(f"{email}.png", caption="Scan the QR code with your TOTP app to finish setup")
-                            finished = st.form_submit_button("Finished Setup!")
-                            if finished:
-                                backend.createTable()
-                                backend.createAccount(email, password, encrypted)
-                                st.success("Your account has been created!!you can try to login to your account")
-                        else:
-                            st.error("Invalid OTP. Please try again.")
+                            print('test2')
+                            if 'randomdgt' in st.session_state and user_otp == st.session_state['randomdgt']:
+                                print('works')
+                                st.session_state['Verified'] = True
+                                st.success("Email successfully verified!!! Please proced to 2FA verification.")
+                                generratingQR = generate_totp_qr(email, secretkey)
+                                st.session_state['generatingQR'] = generratingQR
+                                st.image(f"{email}.png", caption="Scan the QR code with your TOTP app to finish setup")
+                                finished = st.form_submit_button("Finished Setup!")
+                                if finished:
+                                    backend.createAccount(email, password, encrypted)
+                                    st.success("Your account has been created!!you can try to login to your account")
+                            else:
+                                st.error(f"Invalid OTP. Please try again.")
 
 
     elif choice == 'Login':
@@ -99,6 +104,7 @@ def main():
             st.markdown("### Log In")
             email = st.text_input("Email")
             password = st.text_input("Password", type="password")
+            submitted = st.form_submit_button("Log In")
             data_retrival_from_db = backend.retieval_data(email)
             if not email or not password:
                 st.error("Please fill in all fields.")
@@ -109,7 +115,7 @@ def main():
                     st.success(status)
                     otp_code = st.text_input("OTP Code")
                     decrected_secret_key = handling_totp_secretkey.decrypt_secret_key(data_retrival_from_db[0], data_retrival_from_db[1], data_retrival_from_db[2], data_retrival_from_db[3])
-                    submitted = st.form_submit_button("Log In")
+                    # submitted = st.form_submit_button("Log In")
                     if submitted:
                         # Here you'd use the actual key associated with the username
                         if verify_totp(decrected_secret_key, otp_code) == True:
@@ -120,10 +126,6 @@ def main():
                     status = "Invalid Password :( or email address"
                     st.error(status)
         
-
-        
-
-
 
 
 if __name__=="__main__":
