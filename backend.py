@@ -1,33 +1,37 @@
 import sqlite3
 import bcrypt
 import re
+import json
 #small dict -> to check if its frequent password -> 
 
 def createDB():
     conn = sqlite3.connect("Verification.db")
     cur = conn.cursor()
+
     cur.execute('''CREATE TABLE IF NOT EXISTS User_Info(
-         Email TEXT NOT NULL,
+        Email TEXT NOT NULL,
         Password BLOB NOT NULL,
         PRIMARY KEY (Email),
-        CONSTRAINT unique_val UNIQUE (Email))''')  
+        CONSTRAINT unique_val UNIQUE (Email)),
+        Combined_data TEXT NOT NULL''')  
     
 def dropTables():
     conn = sqlite3.connect("Verification.db")
     cur = conn.cursor()
     cur.execute("DROP TABLE IF EXISTS User_Info")
 
-def createAccount():
-    conn = sqlite3.connect("Verification.db")
+def createAccount(conn, email_input, userpassword):
+    # conn = sqlite3.connect("Verification.db")
     cur = conn.cursor()
-    email_input = validEmail()
-    password_input = validPassword()
-    bytes = password_input.encode('utf-8')
+    # email_input = validEmail()
+    # password_input = validPassword()
+    bytes = userpassword.encode('utf-8')
     salt = bcrypt.gensalt()
     encoded_password = bcrypt.hashpw(bytes, salt) #add the thing from sql lab
     cur.execute('''INSERT INTO User_Info (Email, Password) VALUES (?, ?)''',
                 (email_input, encoded_password))
     conn.commit() 
+
 
 def validEmail():
     while True:
@@ -82,10 +86,5 @@ def adminInfo():
     else:
         print("No records found.")
 
-def main(): 
+if __name__ == '__main__':
     dropTables()
-    createDB()
-    createAccount()
-    checkAccount()
-    adminInfo()
-main()

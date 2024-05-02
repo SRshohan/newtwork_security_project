@@ -3,7 +3,7 @@ import pyotp
 from twofa import generate_totp_qr, verify_totp
 
 
-key = pyotp.random_base32()
+
 def sign_up():
     """User sign-up process."""
     with st.form("signup_form"):
@@ -51,6 +51,8 @@ def sign_up():
                 # st.image(f"{email}.png", caption="Scan the QR code with your TOTP app to finish setup.")
                 # st.success("Sign Up Successful! Please save your TOTP key securely.")
 
+
+
 def login_page():
     """User login process."""
     with st.form("login_form"):
@@ -66,6 +68,7 @@ def login_page():
                 st.success("Logged in successfully!")
             else:
                 st.error("Invalid login or OTP. Please try again.")
+
 
 def main():
     """Main function to select the user action: Sign Up or Log In."""
