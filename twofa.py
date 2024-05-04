@@ -10,7 +10,7 @@ def generate_totp_qr(email, key): # key = pyotp.random_base32()  # Generate a ra
     uri = totp.provisioning_uri(name=email, issuer_name="Authenticator App")
     qr = qrcode.make(uri)
     qr.save(f"{email}.png")
-    return qr
+    
 
 def verify_totp(key, otp_code):
     """Verifies the OTP code entered by the user."""

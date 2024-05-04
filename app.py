@@ -3,20 +3,13 @@ import handling_totp_secretkey
 from twofa import verify_totp, generate_totp_qr
 import sendEmail
 import streamlit as st
-from streamlit import error
+import re
 from dotenv import load_dotenv
 import os
-import re
-
-
 
 password = os.getenv('ENV', 'local')
 dotenv = f'.env.{password}'
-# Define email sender and receiver
 load_dotenv(dotenv_path=dotenv)
-
-
-
 
 def main():
     """Main function to select the user action: Sign Up or Log In."""
@@ -25,16 +18,11 @@ def main():
     choice = st.radio("What would you like to do?", ['Create an Account', 'Login'])
 
     if choice == 'Create an Account':
-        common_PW = {
-                    "Password123@",
-                    "Password123",
-                    "AdminPassword1234",
-                    "LetMeInNow123"
-                    }
+        common_PW = {"Password123@", "Password123", "AdminPassword1234", "LetMeInNow123"}
+        
         """ User sign-up process."""
         with st.form("signup_form"):
             st.markdown("### Sign Up\nPlease enter your details below to create an account.")
-            # Adding a colorful background to the title using Streamlit's columns
             col1, col2, col3 = st.columns([1, 6, 1])
             with col2:
                 st.markdown("""
@@ -56,10 +44,11 @@ def main():
             password_confirm = st.text_input("Confirm Password", type="password")
             submitted = st.form_submit_button("Sign Up")
             
-
-            encrypted = handling_totp_secretkey.generate_and_endcrypt_secret_key(password)
-            secretkey = encrypted[3]
-
+            if 'secretkey' not in st.session_state:
+                if password:
+                    st.session_state['secretkey'] = handling_totp_secretkey.generate_and_endcrypt_secret_key(password)
+            secretkey = st.session_state.get('secretkey', None)
+            st.write(secretkey)
 
             if submitted:
                 if not email or not password or not password_confirm:
@@ -68,65 +57,65 @@ def main():
                     st.error("Passwords do not match.")
                 else:
                     if (len(password) < 8 or not re.search(r"[A-Z]", password) or not re.search(r"[a-z]", password) or not re.search(r"[0-9]", password) or not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password)):
-                        st.error("Please make sure if you you special characters combination")
-                    # otp = pyotp.random_base32()
+                        st.error("Please make sure if you use special characters combination")
                     elif password in common_PW:
                         st.error("Password is common. Try again...")
-    #             print("Password is common. Try again...")
                     else:
                         randomdgt = sendEmail.randomDigit()
                         sendEmail.send_emails(email, randomdgt)
-                        st.session_state['randomdgt'] = randomdgt 
+                        if 'randomgt' not in st.session_state:  
+                            st.session_state['randomdgt'] = randomdgt 
+                        randomdgt = st.session_state.get('randomgt', None)
                         user_otp = st.text_input("Enter the OTP sent to your email", key="otp_verification")
-                        verify_button = st.button("Verify OTP")
-                        print('test')
-                        if verify_button:
-                            print('test2')
-                            if 'randomdgt' in st.session_state and user_otp == st.session_state['randomdgt']:
-                                print('works')
-                                st.session_state['Verified'] = True
-                                st.success("Email successfully verified!!! Please proced to 2FA verification.")
-                                generratingQR = generate_totp_qr(email, secretkey)
-                                st.session_state['generatingQR'] = generratingQR
-                                st.image(f"{email}.png", caption="Scan the QR code with your TOTP app to finish setup")
-                                finished = st.form_submit_button("Finished Setup!")
-                                if finished:
-                                    backend.createAccount(email, password, encrypted)
-                                    st.success("Your account has been created!!you can try to login to your account")
-                            else:
-                                st.error(f"Invalid OTP. Please try again.")
+                        if 'user_otp' not in st.session_state:
+                            st.session_state['user_otp'] = user_otp
+                        user_otp = st.session_state.get('user_otp', None)
+                        # verify_button = st.form_submit_button("Verify OTP")
+             # Add the verification button outside of the form block
+            verify_button = st.form_submit_button("Verify OTP")
 
+            if verify_button:
+                if len(secretkey) > 3:
+                    st.write("Submitted")
+                    if user_otp == randomdgt:
+                        st.session_state['Verified'] = True
+                        st.success("Email successfully verified!!! Please proceed to 2FA verification.")
+                        generratingQR = generate_totp_qr(email, password)
+                        st.session_state['generatingQR'] = generratingQR
+                        st.image(f"{email}.png", caption="Scan the QR code with your TOTP app to finish setup")
+                        finished = st.form_submit_button("Finished Setup!")
+                        if finished:
+                            backend.createAccount(email, password, secretkey)
+                            st.success("Your account has been created! You can try to log in to your account.")
 
     elif choice == 'Login':
-        
         """ User login process. """
         with st.form("login_form"):
             st.markdown("### Log In")
             email = st.text_input("Email")
             password = st.text_input("Password", type="password")
             submitted = st.form_submit_button("Log In")
-            data_retrival_from_db = backend.retieval_data(email)
             if not email or not password:
                 st.error("Please fill in all fields.")
             else:
-                checking_from_db = backend.checkAccount(email, password)
-                if checking_from_db == True:
-                    status ='Login successful!'
-                    st.success(status)
-                    otp_code = st.text_input("OTP Code")
-                    decrected_secret_key = handling_totp_secretkey.decrypt_secret_key(data_retrival_from_db[0], data_retrival_from_db[1], data_retrival_from_db[2], data_retrival_from_db[3])
-                    # submitted = st.form_submit_button("Log In")
-                    if submitted:
-                        # Here you'd use the actual key associated with the username
-                        if verify_totp(decrected_secret_key, otp_code) == True:
-                            st.success("Logged in successfully!")
-                        else:
-                            st.error("Invalid login or OTP. Please try again.")
+                data_retrieval_from_db = backend.retrieve_data(email)
+                if data_retrieval_from_db is not None:
+                    checking_from_db = backend.checkAccount(email, password)
+                    if checking_from_db:
+                        status ='Login successful!'
+                        st.success(status)
+                        otp_code = st.text_input("OTP Code")
+                        decrypted_secret_key = handling_totp_secretkey.decrypt_secret_key(data_retrieval_from_db[0], password, data_retrieval_from_db[1], data_retrieval_from_db[2])
+                        if submitted:
+                            if verify_totp(decrypted_secret_key, otp_code):
+                                st.success("Logged in successfully!")
+                            else:
+                                st.error("Invalid login or OTP. Please try again.")
+                    else:
+                        status = "Invalid Password or email address"
+                        st.error(status)
                 else:
-                    status = "Invalid Password :( or email address"
-                    st.error(status)
-        
-
+                    st.error("Email not found. Please check your email or sign up.")
 
 if __name__=="__main__":
     main()

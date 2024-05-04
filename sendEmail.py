@@ -24,7 +24,7 @@ import random
 # server.quit()
 
 def randomDigit():
-    res = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    res = ''.join(random.choices(string.digits, k=6))
     return str(res)
 
 

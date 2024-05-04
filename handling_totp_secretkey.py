@@ -39,28 +39,32 @@ def generate_and_endcrypt_secret_key(userpassword):
     encrypted_secret_key = encryptor.update(secret_key.encode()) + encryptor.finalize()
     """ This encodes the raw binary data of the encrypted secret key into a format that can be safely stored in a text field in a database or
     transmitted over protocols that are not binary-safe."""
-    return (urlsafe_b64encode(encrypted_secret_key), urlsafe_b64encode(iv), salt, secret_key)
+    return (urlsafe_b64encode(encrypted_secret_key), urlsafe_b64encode(iv), urlsafe_b64encode(salt), secret_key)
 
 
 
 
 def decrypt_secret_key(encryptend_secret_key, userpassword, iv, salt):
     """ Decrypt the secret key """
+    if isinstance(userpassword, str):
+        userpassword = userpassword.encode()
+
+    encryptend_secret_key = urlsafe_b64decode(encryptend_secret_key)
+    iv = urlsafe_b64decode(iv)
+    salt = urlsafe_b64decode(salt)
+
     kdf = Scrypt(salt=salt, length=32, n=2**14, r=8, p=1, backend=default_backend())
     key = kdf.derive(userpassword)
-    iv = urlsafe_b64decode(iv)
 
-    if userpassword:
-        userpassword = userpassword.encode()
     cipher = Cipher(algorithms.AES(key), modes.CFB8(iv), backend=default_backend())
     decryptor = cipher.decryptor()
-    decrypt_secret_key = decryptor.update(urlsafe_b64decode(encryptend_secret_key)) + decryptor.finalize()
-    decrypt_secret_key = decrypt_secret_key.decode()
+    secret_key = decryptor.update(encryptend_secret_key) + decryptor.finalize()
+    secret_key = secret_key.decode()
 
-    return decrypt_secret_key
+    return secret_key
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     encrypt = generate_and_endcrypt_secret_key('Shohan@')
     decrypt = decrypt_secret_key(encrypt[0], 'Shohan@', encrypt[1], encrypt[2])
     print(encrypt)

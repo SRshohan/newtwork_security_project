@@ -19,14 +19,15 @@ def dropTables():
     cur = conn.cursor()
     cur.execute("DROP TABLE IF EXISTS User_Info")
 
+
 def createAccount(email_input, userpassword, encrypted_data):
     conn = sqlite3.connect("Verification.db")
     cur = conn.cursor()
     createTable()
     json_data = json.dumps({
-        'encrypted':encrypted_data[0],
-        'iv': encrypted_data[1],
-        'salt': encrypted_data[2],
+        'encrypted':encrypted_data[0].decode('utf-8'),
+        'iv': encrypted_data[1].decode('utf-8'),
+        'salt': encrypted_data[2].decode('utf-8'),
         'secret_key': encrypted_data[3]
     })
     # email_input = validEmail()
@@ -101,8 +102,6 @@ def retieval_data(email):
     secret_key = json_data['secret_key']  # Only if you are storing the plaintext secret key
 
     return (encrypted_secret_key, iv, salt, secret_key)
-
-
 
 
 def adminInfo():
