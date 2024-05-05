@@ -1,41 +1,80 @@
 # Secure Web Authentication System
 
+
 ## Objective
 Develop a secure web authentication system that enhances both user experience and security for professional websites.
 
 ## Functionalities and Library Roles
 
 ### Backend Libraries
-- **bcrypt:** This library is used for hashing and salting user passwords. It provides a secure way to store passwords in the database, ensuring they are resistant to brute force attacks.
-- **re (Regex):** Utilized for validating user inputs, such as ensuring password complexity requirements are met and formatting checks on emails or usernames.
+- **bcrypt**: Utilized for hashing and salting passwords. This library helps securely store passwords in the database, making them resistant to brute force attacks.
+- **cryptography**: Implements encryption and decryption functionalities to ensure data confidentiality and integrity.
+- **db-sqlite3**: Manages local storage of user data in a SQLite database, offering a lightweight, yet robust option for handling relational data.
+- **python-dotenv**: Facilitates the management of environment variables, keeping sensitive information such as database configurations and API keys secure.
 
 ### Frontend
-- **Streamlit:** A Python library used to create the frontend interface for the web authentication system. Streamlit allows for quick prototyping and easy deployment of web apps, providing interactive user elements like forms and buttons for login procedures.
+- **Streamlit**: Employs this library to build the frontend interface. Streamlit simplifies the creation of interactive, web-based user interfaces for Python applications.
 
 ### Additional Libraries
-- **pyotp:** Implements Two-Factor Authentication (2FA) by generating time-based one-time passwords (TOTPs). This enhances security by requiring a second form of verification beyond just the username and password.
-- **SendGrid:** Used for the email-based 2FA option, sending users a one-time verification code via email which they need to enter to complete the login process.
+- **pyotp**: Integrates time-based One-Time Password (TOTP) for Two-Factor Authentication (2FA), enhancing user login security.
+- **qrcode**: Generates QR codes necessary for setting up TOTP in authentication applications like Google Authenticator.
+- **watchdog**: Monitors the file system for changes, useful for real-time alerting or other reactive programming scenarios.
 
-### OpenAI API
-- **OpenAI API:** Integrated to enhance security features, such as:
-  - **Password Policy Enhancement:** Leverages AI models to analyze and improve password strength against common hacking techniques.
-  - **Security Alerts and Notifications:** AI is used to monitor unusual sign-in attempts or anomalous behavior patterns, sending real-time alerts to users and administrators.
-  - **User Behavior Analysis:** Machine learning techniques identify and alert on deviations from typical user activity, which may indicate potential security breaches.
+### Mobile Authentication
+- **Google Authenticator**: Users are required to install this app to interact with the QR codes and generate TOTPs as part of the 2FA process.
 
 ## Technology Stack
-- **Backend:** Python
-- **Frontend:** Streamlit
-- **Libraries:** bcrypt, re, OpenAI API
+- **Backend**: Python
+- **Frontend**: Streamlit
+- **Libraries**: bcrypt, pyotp, qrcode, watchdog, cryptography, db-sqlite3, python-dotenv
 
 ## Getting Started
 
 ### Prerequisites
-- Python 3.8+
-- Streamlit
-- bcrypt
-- pyotp
-- SendGrid API key
-- OpenAI API key
+- Python 3.8 or higher
+- Google Authenticator app installed on your mobile device for 2FA
+
+### Environment Setup
+
+#### For Windows
+1. Install virtualenv if not already installed:
+   ```bash
+   pip install virtualenv
+
+
+### For macOS Setup:
+
+```markdown
+# Secure Web Authentication System
+
+## Getting Started - macOS
+
+### Prerequisites
+- Ensure you have Python 3.8 or higher installed on your machine. Python can be installed via [python.org](https://www.python.org/downloads/) or using Homebrew:
+  ```bash
+  brew install python
+
+
+### For macOS Setup:
+
+```markdown
+# Secure Web Authentication System
+
+## Getting Started - macOS
+
+### Prerequisites
+- Ensure you have Python 3.8 or higher installed on your machine. Python can be installed via [python.org](https://www.python.org/downloads/) or using Homebrew:
+
+
+brew install python
+
+
+python3 -m venv venv
+
+        or
+
+source venv/bin/activate
+
 
 ### Installation
 Clone the repository and install the dependencies:
@@ -43,6 +82,8 @@ Clone the repository and install the dependencies:
 git clone https://github.com/SRshohan/newtwork_security_project.git
 cd yourrepository
 pip install -r requirements.txt
+          or
+pip3 install -r requirements.txt
 
 # To Run the application
 streamlit run app.py

@@ -13,6 +13,7 @@ def createTable():
         Combined_data TEXT NOT NULL,
         PRIMARY KEY (Email),
         CONSTRAINT unique_val UNIQUE (Email))''')  
+    conn.commit()
     
 def dropTables():
     conn = sqlite3.connect("Verification.db")
@@ -36,7 +37,9 @@ def createAccount(email_input, userpassword, encrypted_data):
     salt = bcrypt.gensalt()
     encoded_password = bcrypt.hashpw(bytes, salt) #add the thing from sql lab
     cur.execute('''INSERT INTO User_Info (Email, Password, Combined_data) VALUES (?, ?, ?)''', (email_input, encoded_password, json_data, ))
-    cur.commit() 
+    conn.commit() 
+
+    return True
 
 
 # def validEmail():
@@ -117,4 +120,4 @@ def adminInfo():
 
 
 if __name__ == '__main__':
-    None
+    dropTables()

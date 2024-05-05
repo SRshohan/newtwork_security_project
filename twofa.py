@@ -6,6 +6,7 @@ import qrcode
 # Generate a random TOTP key
 def generate_totp_qr(email, key): # key = pyotp.random_base32()  # Generate a random TOTP key
     """Generates and saves a QR code for TOTP authentication."""
+    
     totp = pyotp.TOTP(key)
     uri = totp.provisioning_uri(name=email, issuer_name="Authenticator App")
     qr = qrcode.make(uri)
