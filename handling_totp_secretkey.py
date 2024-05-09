@@ -11,7 +11,7 @@ def generate_and_endcrypt_secret_key(userpassword):
     if isinstance(userpassword, str):
         userpassword = userpassword.encode()
     secret_key = pyotp.random_base32()
-    salt = os.urandom(16) # Generate a secure from the OS library which is randomly generated
+    salt = os.urandom(16) # Generate a secure key from the OS library which is randomly generated
     iv = os.urandom(16)
     """ Derive a cryptographic key from the userpassword """
     """

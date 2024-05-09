@@ -2,7 +2,6 @@ streamlit
 pyotp
 qrcode
 watchdog
-bycrypt 
+bcrypt 
 cryptography
-db-sqlite3
 python-dotenv

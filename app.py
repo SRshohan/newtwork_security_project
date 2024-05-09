@@ -7,7 +7,7 @@ import re
 from dotenv import load_dotenv
 import os
 
-password = os.getenv('ENV', 'prod')
+password = os.getenv('ENV', 'local')
 dotenv = f'.env.{password}'
 load_dotenv(dotenv_path=dotenv)
 
@@ -38,7 +38,7 @@ def main():
                 email = st.session_state.get('email')
                 password = st.session_state.get('password')
                 password_confirm = st.session_state.get('password_confirm')
-                st.write(email, password, password_confirm)
+                # st.write(email, password, password_confirm)
                 # validate_signup(email, password, password_confirm)
         if password == password_confirm and validate_signup(email, password, password_confirm) == True:
             st.write('Stup 2 step')
@@ -98,7 +98,7 @@ def handle_signup(email, password):
         st.session_state['verify_attempt'] = False  # Reset flag after OTP generation
 
     # Display the OTP for debugging (remove or secure in production)
-    st.write("DEBUG: OTP sent is", st.session_state['randomdgt'])
+    # st.write("DEBUG: OTP sent is", st.session_state['randomdgt'])
 
     with st.form("verify"):
         otp_code = st.text_input("Enter the OTP sent to your email", key='otp_input')
