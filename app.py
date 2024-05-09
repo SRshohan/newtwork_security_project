@@ -11,6 +11,7 @@ password = os.getenv('ENV', 'prod')
 dotenv = f'.env.{password}'
 load_dotenv(dotenv_path=dotenv)
 
+
 def reset_session_variables():
     st.session_state['email'] = ''
     st.session_state['password'] = ''

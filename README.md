@@ -71,7 +71,7 @@ brew install python
 
 python3 -m venv venv
 
-        or
+ 
 
 source venv/bin/activate
 
